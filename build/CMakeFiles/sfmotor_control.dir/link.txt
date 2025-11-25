@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/sfmotor_control.dir/src/main.cpp.o CMakeFiles/sfmotor_control.dir/include/CAN_comm.cpp.o CMakeFiles/sfmotor_control.dir/include/CAN_twai.cpp.o -o sfmotor_control 
