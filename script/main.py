@@ -2,62 +2,63 @@ import sys
 import time
 import select
 
-# 导入核心控制包 (假设 sf_can_controller.py 位于同一目录下)
+# Import core control module (assumes sf_can_controller.py is in the same directory)
 from sf_can_controller import MotorController 
 
-# --- 核心配置 ---
+# --- Core Configuration ---
 IFACE = "can0"        
-MOTOR_ID = 1          
+MOTOR_ID = 1         # <- Change ID to control different motors
 UPDATE_RATE_HZ = 100.0 
 PRINT_EVERY = 2     
 INITIAL_TARGET_DEG = 0.0
 
-# --- 主控制循环 ---
+# --- Main Control Loop ---
 def run_simple_test() -> None:
-    """运行简化的位置控制循环。"""
+    """Run a simplified position control loop."""
     
-    # 1. 初始化
+    # 1. Initialization
     update_period = 1.0 / UPDATE_RATE_HZ
     target_rad = INITIAL_TARGET_DEG
     
-    KP, KD = 0.5, 0.3 # 默认 MIT 参数
+    KP, KD = 0.5, 0.3  # Default MIT parameters
     
     controller = MotorController(interface=IFACE, motor_id=MOTOR_ID)
     print(f"--- SF Motor Test Start ---")
-    print(f"接口: {IFACE}, ID: {MOTOR_ID}, 频率: {UPDATE_RATE_HZ} Hz")
+    print(f"Interface: {IFACE}, ID: {MOTOR_ID}, Rate: {UPDATE_RATE_HZ} Hz")
     
-    # 2. 使能
+    # 2. Enable motor
     controller.enable()
     
     last_send_time = time.perf_counter()
     print_counter = 0
 
-    inputCheckCount = 0;
-    # 3. 主循环
+    inputCheckCount = 0
+
+    # 3. Main loop
     while True:
         controller.poll_rx()
         current_state = controller.get_motor_state()
         
         now = time.perf_counter()
         
-        # --- 周期性输入检查 (每 100 个循环) ---
+        # --- Periodic input check (every 500 loops) ---
         inputCheckCount += 1
         if inputCheckCount >= 500:
             inputCheckCount = 0
             
-            # 使用阻塞 I/O 等待用户输入（会暂停控制循环）
-            # 注意：如果输入非数字，程序将抛出 ValueError 崩溃。
-            line = input("请输入目标关节角度: ").strip()
+            # Blocking I/O waiting for user input (this will pause the control loop)
+            # Note: If the input is not a number, a ValueError will be raised.
+            line = input("Please enter target joint angle: ").strip()
             if line:
                 angle_deg = float(line)
                 target_rad = angle_deg
-                print(f"已更新目标关节角度：{angle_deg:.3f} °")
+                print(f"Target joint angle updated: {angle_deg:.3f} deg")
         
-        # 周期性发送 MIT 命令
+        # Periodically send MIT command
         if now - last_send_time >= update_period:
             last_send_time = now
             
-            # 发送目标位置命令
+            # Send target position command
             controller.send_mit_command(
                 pos=target_rad,
                 vel=0.0,
@@ -66,7 +67,7 @@ def run_simple_test() -> None:
                 tor=0.0
             )
 
-            # 打印状态
+            # Print motor state
             print_counter += 1
             if print_counter >= PRINT_EVERY:
                 print_counter = 0
@@ -79,5 +80,5 @@ def run_simple_test() -> None:
             
 
 if __name__ == "__main__":
-    # 运行测试
+    # Run test
     run_simple_test()

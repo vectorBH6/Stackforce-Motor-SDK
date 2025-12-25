@@ -1,48 +1,51 @@
 # SF Motor Control
 
-SF Motor Control 是一个基于 C++ 的电机控制项目，用于通过 CAN 总线与 SF 系列电机控制器通信，实现对电机的精确控制。
+SF Motor Control is a C++-based motor control project designed to communicate with SF series motor controllers via the CAN bus, enabling precise motor control.
 
-## 项目概述
+### Complete Tutorial + Development Board and Motor Purchase Links(https://files.seeedstudio.com/wiki/robotics/Actuator/stackforce/Hardware_connect.png)
 
-该项目提供了通过 CAN 总线控制 SF 系列电机的功能，支持电机使能、失能、零位设置以及 MIT（Motor Identity Transform）控制模式等功能。MIT 控制模式允许用户直接设定电机的位置、速度、Kp和Kd等参数。
+![Hardware Connection Instructions](https://files.seeedstudio.com/wiki/robotics/Actuator/stackforce/Hardware_connect.png)
 
-项目同时提供了 C++ 和 Python 两种语言的实现
+## Project Overview
 
-## 功能特点
+This project provides functionality to control SF series motors through the CAN bus. It supports motor enable/disable, zero position setting, and the MIT (Motor Identity Transform) control mode. The MIT control mode allows users to directly set motor position, velocity, Kp, and Kd parameters.
 
-- 支持 SF 系列电机的完整控制（使能/失能/零位设置）
-- 实现 MIT 控制模式，可精确控制电机位置、速度和力矩
-- 支持多电机控制（最多 4 个电机）
-- 提供实时反馈，可以读取电机的实际位置、速度和扭矩
-- 同时提供 C++ 和 Python 实现
+The project provides implementations in both C++ and Python.
 
-## 硬件要求
+## Features
 
-- 支持 CAN 总线的主机系统（如 Jetson Nano、树莓派等）
-- SF 系列电机及相应的驱动器
-- CAN 总线收发器
-- 正确连接的 CAN 总线网络
+- Supports full control of SF series motors (enable/disable/zero setting)
+- Implements MIT control mode for precise control of motor position, velocity, and torque
+- Supports multi-motor control (up to 4 motors)
+- Provides real-time feedback, including actual motor position, velocity, and torque
+- Offers both C++ and Python implementations
 
-## 软件依赖
+## Hardware Requirements
 
-### C++ 版本
-- C++17 兼容的编译器（如 GCC 7+）
+- Host system with CAN bus support (e.g., Jetson Nano, Raspberry Pi)
+- SF series motors and corresponding drivers
+- CAN bus transceiver
+
+## Software Dependencies
+
+### C++ Version
+- C++17 compatible compiler (e.g., GCC 7+)
 - CMake 3.10+
-- Linux 系统（需要 socketCAN 支持）
+- Linux system (requires socketCAN support)
 
-### Python 版本
+### Python Version
 - Python 3.6+
 
-## 使用方法
+## Usage
 
-在运行之前，请确保系统已经正确配置了 CAN 接口。例如，对于 `can0` 接口：
+Before running the program, ensure that the CAN interface is correctly configured. For example, for the `can0` interface:
 
 ```bash
 sudo ip link set can0 up type can bitrate 1000000
 sudo ip link set can0 up
-```
+````
 
-### C++ 版本
+### C++ Version
 
 ```bash
 cd build
@@ -50,108 +53,112 @@ cmake ..
 make
 ```
 
-编译后的可执行文件将位于 `build/sfmotor_control`。运行程序：
+The compiled executable will be located at `build/sfmotor_control`. Run the program with:
 
 ```bash
 ./sfmotor_control
 ```
 
-程序默认会控制 ID 为 0x01 的电机，在运行过程中可以通过键盘输入目标角度值，单位rad。同时接收电机角度，角速度的反馈数据。
+By default, the program controls the motor with ID `0x01`. During execution, you can input target angle values via the keyboard.
 
-### Python 版本
+### Python Version
 
-Python 脚本位于 `script/` 目录中，可以直接运行无需编译。
+Python scripts are located in the `script/` directory and can be run directly without compilation.
 
 ```bash
 python main.py 
 ```
 
-程序默认会控制 ID 为 0x01 的电机，在运行过程中可以通过键盘输入目标角度值，单位rad。同时接收电机角度，角速度的反馈数据。
-
-## 代码结构
+## Code Structure
 
 ```
 SFmotor_control/
-├── include/                  # 头文件及实现文件
-│   ├── CAN_comm.cpp          # CAN 通信实现
-│   ├── CAN_comm.h            # CAN 通信接口定义
-│   ├── CAN_twai.cpp          # TWAI 协议实现
-│   └── CAN_twai.h            # TWAI 协议接口定义
-├── script/                   # Python 控制脚本
+├── include/                  # Header and implementation files
+│   ├── CAN_comm.cpp          # CAN communication implementation
+│   ├── CAN_comm.h            # CAN communication interface definitions
+│   ├── CAN_twai.cpp          # TWAI protocol implementation
+│   └── CAN_twai.h            # TWAI protocol interface definitions
+├── script/                   # Python control scripts
 │   ├── __init__.py
-│   ├── main.py               # Python 示例主程序
-│   └── sf_can_controller.py  # Python CAN 控制器实现
-├── src/                      # C++ 主程序源码
-│   ├── config.h              # 配置和数据结构定义
-│   └── main.cpp              # 主控制程序
-└── CMakeLists.txt            # CMake 构建配置
+│   ├── main.py               # Python example main program
+│   └── sf_can_controller.py  # Python CAN controller implementation
+├── src/                      # C++ main program source code
+│   ├── config.h              # Configuration and data structure definitions
+│   └── main.cpp              # Main control program
+└── CMakeLists.txt            # CMake build configuration
 ```
 
-## 通信协议
+## Communication Protocol
 
-项目实现了针对 SF 系列电机的专用 CAN 通信协议：
+This project implements a dedicated CAN communication protocol for SF series motors:
 
-- 使用标准 CAN 帧（11 位标识符）
-- 支持多种功能码（NMT、RPDO、TPDO 等）
-- MIT 控制模式采用专有数据格式
+* Uses standard CAN frames (11-bit identifiers)
+* Supports multiple function codes (NMT, RPDO, TPDO, etc.)
+* MIT control mode uses a proprietary data format
 
-### 主要功能码
+### Main Function Codes
 
-| 功能码 | 值     | 用途             |
-|--------|--------|------------------|
-| NMT    | 0x000  | 网络管理         |
-| RPDO1  | 0x200  | 实时过程数据输出 |
-| TPDO1  | 0x180  | 实时过程数据输入 |
+| Function Code | Value | Purpose                    |
+| ------------- | ----- | -------------------------- |
+| NMT           | 0x000 | Network management         |
+| RPDO1         | 0x200 | Real-time process data out |
+| TPDO1         | 0x180 | Real-time process data in  |
 
-### 控制命令
+### Control Commands
 
-1. **使能命令**：通过 NMT 功能码发送使能信号
-2. **失能命令**：通过 NMT 功能码发送失能信号
-3. **MIT 控制命令**：通过 RPDO1 发送位置、速度、Kp、Kd 和扭矩参数
+1. **Enable Command**: Sends an enable signal via the NMT function code
+2. **Disable Command**: Sends a disable signal via the NMT function code
+3. **MIT Control Command**: Sends position, velocity, Kp, Kd, and torque parameters via RPDO1
 
-## API 参考
+## API Reference
 
 ### C++ API
 
-主要函数包括：
+Main functions include:
 
-- `CANInit()` - 初始化 CAN 接口
-- `enable(uint8_t nodeID)` - 使能指定 ID 的电机
-- `disable(uint8_t nodeID)` - 失能指定 ID 的电机
-- `sendMITCommand(uint8_t nodeID, MIT command)` - 发送 MIT 控制命令
-- `recCANMessage()` - 接收 CAN 消息
+* `CANInit()` - Initialize the CAN interface
+* `enable(uint8_t nodeID)` - Enable the motor with the specified ID
+* `disable(uint8_t nodeID)` - Disable the motor with the specified ID
+* `sendMITCommand(uint8_t nodeID, MIT command)` - Send an MIT control command
+* `recCANMessage()` - Receive CAN messages
 
 ### Python API
 
-主要类和方法：
+Main class and methods:
 
-- `MotorController` 类
-  - `enable()` - 使能电机
-  - `disable()` - 失能电机
-  - `send_mit_command(pos, vel, kp, kd, tor)` - 发送 MIT 控制命令
-  - `poll_rx()` - 轮询接收 CAN 消息
+* `MotorController` class
 
-## 注意事项
+  * `enable()` - Enable the motor
+  * `disable()` - Disable the motor
+  * `send_mit_command(pos, vel, kp, kd, tor)` - Send an MIT control command
+  * `poll_rx()` - Poll and receive CAN messages
 
-1. 在运行程序前必须确保 CAN 接口已经正确配置并启动
-2. 电机控制涉及大功率设备，请注意电气安全
-3. 项目目前假设 CAN 接口名称为 `can0`，如有不同请修改源代码
-4. 控制参数（如 Kp、Kd）需要根据具体应用场景进行调整
+## Notes
 
-## 故障排除
+1. Ensure that the CAN interface is properly configured and started before running the program
+2. Motor control involves high-power equipment—pay attention to electrical safety
+3. The project currently assumes the CAN interface name is `can0`; modify the source code if different
+4. Control parameters (such as Kp and Kd) must be tuned according to the specific application
 
-常见问题及解决方案：
+## Troubleshooting
 
-1. **无法打开 CAN 接口**
-   - 检查是否正确配置并启动了 CAN 接口
-   - 确认使用的接口名称是否匹配（默认为 can0）
+Common issues and solutions:
 
-2. **无法与电机通信**
-   - 检查 CAN 总线物理连接
-   - 确认电机 ID 设置是否正确
-   - 验证 CAN 波特率设置是否匹配
+1. **Unable to open CAN interface**
 
-3. **控制效果不佳**
-   - 调整 PID 参数（Kp、Kd）
-   - 检查电机和负载的机械连接
-   - 确保供电电压稳定
+   * Check whether the CAN interface is correctly configured and started
+   * Confirm that the interface name matches (default is `can0`)
+
+2. **Unable to communicate with the motor**
+
+   * Check the physical CAN bus connections
+   * Confirm that the motor ID settings are correct
+   * Verify that the CAN baud rate settings match
+
+3. **Poor control performance**
+
+   * Adjust PID parameters (Kp, Kd)
+   * Check the mechanical connection between the motor and the load
+   * Ensure a stable power supply voltage
+
+
